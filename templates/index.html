@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+{% load cart_filters %}
+
 {% load static %}
 
 {% block tite %}
@@ -11,16 +13,31 @@
     <hr>  
     <div style="width: 100%; display: flex; flex-wrap: wrap; justify-content: center;">
         {% for product in data %}
-        <a href="{% url 'product_detail' product.id %}" class="shadow-sm p-3 bg-body rounded rounded-2 border border-light border-2 btn-light" style="text-decoration: none; cursor: pointer; margin: 10px;">
-             <div style="width: 250px; height: 250px; ">
-                <img src="{{ product.image.url }}" alt="" style="height: 250px; width: 250px;; object-fit: contain;">
-            </div>
-            <div class="text-dark" style="width: 250px;">
-                <h3  style="margin-top: 5px;">{{ product.name }}</h3>
-                <h4 style="padding-left: 8px ; color: rgb(13, 110, 253);">{{ product.price }}</h4>
-                <p class="text-secondary" style="padding-left: 8px; margin-bottom: 0; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 3;-webkit-box-orient: vertical;overflow: hidden; line-height: 160%;">{{ product.description }}</p>
-            </div>
-        </a>  
+        <div class="shadow-sm p-3 bg-body rounded rounded-2 border border-light border-2 btn-light" style="text-decoration: none; cursor: pointer; margin: 10px; display: flex; flex-direction: column;">
+            <a href="{% url 'product_detail' product.id %}" style="text-decoration: none;">
+                <div style="width: 250px; height: 250px; ">
+                    <img src="{{ product.image.url }}" alt="" style="height: 250px; width: 250px;; object-fit:cover;"/>
+                </div>
+                <div class="text-dark" style="width: 250px;">
+                        <h3  style="margin-top: 5px;">{{ product.name }}</h3>
+                        <h4 style=" color: rgb(13, 110, 253);">{{ product.price }}</h4>
+                </div>
+            </a> 
+            <p class="text-secondary" style="flex: 1 1 auto; width: 250px; padding-left: 8px; margin-bottom: 10; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 3;-webkit-box-orient: vertical;overflow: hidden; line-height: 160%;">{{ product.description }}</p>
+            {% if user.is_authenticated %}
+                <div class="d-flex justify-content-around text-center align-items-center" style="background-color: rgb(212, 220, 244); border-radius: 10px; padding: 4px;">
+                    {% with carts_product|cart_filters:product.id as cart_item %}
+                    {% if cart_item %}    
+                        <a style="text-decoration: none; width: 30px; padding: 3px; font-weight: 700; font-size: 25px;" href="{% url 'remove_from_cart' cart_item.id %}">-</a> 
+                        <span>{{ carts_product|cart_quantity:product }}</span>
+                        <a style="text-decoration: none; width: 30px; padding: 3px; font-weight: 700; font-size: 20px;" href="{% url 'add_to_cart' product.id %}">+</a>  
+                    {% else %}  
+                        <a style=" text-decoration: none;  padding: 8px; font-weight: 600; font-size: 17px;" href="{% url 'add_to_cart' product.id %}">Добавить в корзину</a>
+                    {% endif %} 
+                    {% endwith %}
+                </div>
+            {% endif %}
+        </div>
         {% endfor %} 
     </div>
     

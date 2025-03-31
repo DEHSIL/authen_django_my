@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 
 admin.site.register(Comment)
 admin.site.register(Product)
+admin.site.register(Cart)
+admin.site.register(Favorite)
 
 # class CustomUserAdmin(admin.
 # ModelAdmin):

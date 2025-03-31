@@ -3,11 +3,9 @@ from index.forms import * # type: ignore
 from .models import *
 from django.contrib.auth import login, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.decorators import login_required
 
 
-
-def prof(req):
-    return render(req, 'profile.html')
 
 def create(req):
     if req.method == 'POST':
@@ -22,6 +20,7 @@ def create(req):
     return render(req, 'create.html', {'form': form})
 
 def product_detail(req, id):
+    
     # is_admin = req.user.is_authenticated and req.user.groups.filter(name='администраторы').exists()
     product = get_object_or_404(Product, id=id)
     comments = Comment.objects.filter(product_id=product.id).order_by('-created_at')
@@ -46,11 +45,18 @@ def product_detail(req, id):
                                                })
 
 def main(req):
+    cart_item = Cart.objects.filter(user=req.user) if req.user.is_authenticated else None
+    # print(cart_items)
+    # for i in cart_items:
+    #     print(i.product)
+    # carts_product = [i.product for i in cart_items]
+    # print(carts_product)
     products = Product.objects.all()
-    for product in products:
-        print(product.id, product.name, product.image.url, product.price, product.description)
-
-    return render(req, 'index.html', {'data':products})
+    return render(req, 'index.html', {'data':products,
+                                      'carts_product': cart_item,
+                                    #   'carts_product': carts_product
+                            
+                                               })
 
 def reg(req):
     if req.method == 'POST':
@@ -77,3 +83,61 @@ def log(req):
 def logout_view(req):
     logout(req)
     return redirect('index')
+
+
+@login_required
+def prof(req):
+    cart_items = Cart.objects.filter(user=req.user)
+    total_price = sum(item.total_price() for item in cart_items)
+    return render(req, 'profile.html', {'cart_items': cart_items, 'total_price': total_price})
+    # return render(req, 'profile.html')
+
+# @login_required
+# def product_list(request):
+#     products = Product.objects.all()
+#     return render(request, 'shop/product_list.html', {'products': products})
+
+@login_required
+def add_to_favorites(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    Favorite.objects.get_or_create(user=request.user, product=product)
+    return redirect('product_list')
+
+@login_required
+def add_to_cart(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    cart_item, created = Cart.objects.get_or_create(user=request.user, product=product)
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+    return redirect('cart_detail')
+
+@login_required
+def add_to_cart2(request, product_id):
+    product = get_object_or_404(Product, id=product_id)
+    cart_item, created = Cart.objects.get_or_create(user=request.user, product=product)
+    if not created:
+        cart_item.quantity += 1
+        cart_item.save()
+    return redirect('index')
+
+@login_required
+def cart_detail(req):
+    cart_items = Cart.objects.filter(user=req.user) if req.user.is_authenticated else None
+    total_price = sum(item.total_price() for item in cart_items)
+    return render(req, 'cart.html', {'cart_items': cart_items, 'total_price': total_price})
+
+@login_required
+def remove_from_cart(request, cart_id):
+    cart_item = get_object_or_404(Cart, id=cart_id, user=request.user)
+    if cart_item.quantity > 1:
+        cart_item.quantity -= 1
+        cart_item.save()
+    else:
+        cart_item.delete()
+    return redirect('index')
+
+@login_required
+def favorite_list(request):
+    favorites = Favorite.objects.filter(user=request.user)
+    return render(request, 'shop/favorite_list.html', {'favorites': favorites})

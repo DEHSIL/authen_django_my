@@ -26,5 +26,11 @@ urlpatterns = [
     path('profile/', prof, name='prof'),
     path('users/', include('index.urls')),
     path('create/', create, name='create'),
-    path('product/<int:id>/', product_detail, name='product_detail')
+    path('product/<int:id>/', product_detail, name='product_detail'),
+    path('favorite/<int:product_id>/', add_to_favorites, name='add_to_favorites'),
+    path('favorites/', favorite_list, name='favorite_list'),
+    path('cart/add/<int:product_id>/', add_to_cart2, name='add_to_cart2'),
+    path('cart/add/<int:product_id>/', add_to_cart, name='add_to_cart'),
+    path('cart/', cart_detail, name='cart_detail'),
+    path('cart/remove/<int:cart_id>/', remove_from_cart, name='remove_from_cart'),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -25,15 +25,9 @@
                             <li class="list-inline-item text-center">
                                <a href="{% url 'prof' %}" class="btn btn-outline-primary">Профиль</a>
                             </li>
-                            <!-- <li class="list-inline-item">
-                                <a href="{% url 'create' %}" class="btn btn-outline-primary">Добавить</a>
-                            </li> -->
-                            <!-- <li class="list-inline-item">
-                                <form action="{% url 'logout' %}" method="post">
-                                    {% csrf_token %}
-                                    <button type="submit" class="btn btn-outline-primary">Выйти</button>
-                                </form>
-                            </li> -->
+                            <li class="list-inline-item text-center">
+                               <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary">Корзина</a>
+                            </li>
                             {% else %}
                             <li class="list-inline-item">
                                 <a href="{% url 'reg' %}" class="btn btn-outline-primary">Регистрация</a>
