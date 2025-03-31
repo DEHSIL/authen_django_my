@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+
+{% load static %}
+
+{% block tite %}
+    { product.name }
+{% endblock %}
+
+{% block con %}
+    <div class="d-flex">
+        <div class="shadow-sm bg-body rounded rounded-2 border border-light border-2 btn-light justify-content-center align-itemss-center" style="height: 500px; width: 500px;">
+            <img class="rounded rounded-2"  style="height: 500px; width: 500px; object-fit: contain; padding: 2px;"  src="{{ product.image.url }}" alt="">
+        </div>
+        <div class="ms-5">
+            <h2  style="width: 700px; font-size: 70px; display: -webkit-box; -webkit-line-clamp: 3;-webkit-box-orient: vertical;overflow: hidden;">{{ product.name }}</h2>
+            <hr>
+            <h3 style="color: rgb(13, 110, 253);">{{ product.price }} Тнг.</р>
+                <br>
+                <br>
+                <br>
+            <p style="font-size: 20px; width: 550px; font-weight: 200; overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical;overflow: hidden; line-height: 160%; color: rgb(104, 103, 103);">{{product.description}}</p>
+        </div>
+    </div>
+    <br>
+    <hr>
+    <div style="margin: 0 100px;">
+        <h2 class="text-center">Комментарии</h2>
+        <br>
+        <div class="d-flex justify-content-between">
+            <div class="">
+            {% for comment in comments %}
+                <div style="width: 450px;" class="mt-2 shadow-sm p-3 bg-body rounded rounded-2 border border-light border-2 btn-light ">
+                    <p style="width: 400px; overflow-wrap: break-word; display: -webkit-box; -webkit-box-orient: vertical;overflow: hidden; line-height: 160%;">{{ comment.text }}</p>
+                    <div class="">
+                        <span style="font-size: 14px;">{{ comment.user }}</span>
+                        <span class="ms-2" style="font-size: 13px; color: rgb(13, 110, 253);" >{{ comment.created_at }}</span>
+                    </div>
+                </div>
+                <br>
+            {% endfor %}
+            </div>
+            {% if user.is_authenticated %}
+            <div class="">
+                <h3 >Добавить комментарий</h3>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-outline-primary">Отправить</button>
+                </form>
+            </div>
+            {% else %}
+                <h5>Войдите что бы остваить комментарии</h5>
+            {% endif %}
+        </div>
+    </div>
+{% endblock con %}

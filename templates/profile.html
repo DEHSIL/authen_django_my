@@ -9,10 +9,27 @@
 </head>
 <body>
     {% block con %}
-        <h1>Добро подаловать {{ user }}</h1>
+    <!-- <div class="d-flex "> -->
+        <h2>Добро подаловать {{ user }}</h2>
+        <form action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-outline-primary">Выйти</button>
+            <a href="{% url 'create' %}" class="btn btn-outline-primary ms-3">Добавить</a>
+        </form>
+        
+        
+    <!-- </div> -->
         <br>
         <br>
-        lass="list-inline-item"
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
+        <br>
     {% endblock con %}
 </body>
 </html>
