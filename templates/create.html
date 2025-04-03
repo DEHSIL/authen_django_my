@@ -1,9 +1,10 @@
 {% extends 'base.html' %}
+
 {% block con %}
 <h2>Создание товара</h2>
 <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit">Сохранить</button>
+    <button type="submit" class="bnt btn-success">Сохранить</button>
 </form>
 {% endblock %}

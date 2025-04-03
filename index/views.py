@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect, get_object_or_404 # type: ignore
 from index.forms import * # type: ignore
-from .models import *
-from django.contrib.auth import login, logout
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
-from django.contrib.auth.decorators import login_required
-
+from .models import * # type: ignore
+from django.contrib.auth import login, logout # type: ignore
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm # type: ignore
+from django.contrib.auth.decorators import login_required # type: ignore
+from django.views.generic import ListView
 
 
 def create(req):
@@ -21,11 +21,11 @@ def create(req):
 
 def product_detail(req, id):
     
-    # is_admin = req.user.is_authenticated and req.user.groups.filter(name='администраторы').exists()
+    is_admin = req.user.is_authenticated and req.user.groups.filter(name='администраторы').exists()
     product = get_object_or_404(Product, id=id)
     comments = Comment.objects.filter(product_id=product.id).order_by('-created_at')
     form = CommentForm() if req.user.is_authenticated else None
-    # extra_content = "Административный контент" if is_admin else ""
+    extra_content = True if is_admin else ""
 
     if req.method == 'POST' and req.user.is_authenticated:
         form = CommentForm(req.POST)
@@ -35,28 +35,36 @@ def product_detail(req, id):
             comment.product = product
             comment.save()
             form = CommentForm()
-            # return redirect('product_detail.html')
 
     print(comments)
     return render(req, 'product_detail.html', {'product': product,
                                                'form': form,
                                                'comments': comments,
-                                            #    'extra_content': extra_content
+                                               'extra_content': extra_content
                                                })
 
-def main(req):
-    cart_item = Cart.objects.filter(user=req.user) if req.user.is_authenticated else None
-    # print(cart_items)
-    # for i in cart_items:
-    #     print(i.product)
-    # carts_product = [i.product for i in cart_items]
-    # print(carts_product)
-    products = Product.objects.all()
-    return render(req, 'index.html', {'data':products,
-                                      'carts_product': cart_item,
-                                    #   'carts_product': carts_product
-                            
-                                               })
+class ProductListView(ListView):
+    model = Product
+    paginate_by = 3
+    template_name = "index.html"
+    context_object_name = "data"  # В шаблоне данные будут доступны как {{ data }}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)  # Получаем базовый контекст
+
+        if self.request.user.is_authenticated:
+            context["carts_product"] = Cart.objects.filter(user=self.request.user)  # Добавляем корзину в контекст
+            context["favorite_product"] = Favorite.objects.filter(user=self.request.user)
+            for i in context['favorite_product']:
+                print(i.product)
+
+            for i in context['carts_product']:
+                print(i.product)
+           
+        else:
+            context["carts_product"] = None
+            context["favorite_product"] = None
+        return context  # Возвращаем обновленный контекст
 
 def reg(req):
     if req.method == 'POST':
@@ -87,21 +95,19 @@ def logout_view(req):
 
 @login_required
 def prof(req):
+    print(req)
     cart_items = Cart.objects.filter(user=req.user)
     total_price = sum(item.total_price() for item in cart_items)
     return render(req, 'profile.html', {'cart_items': cart_items, 'total_price': total_price})
-    # return render(req, 'profile.html')
-
-# @login_required
-# def product_list(request):
-#     products = Product.objects.all()
-#     return render(request, 'shop/product_list.html', {'products': products})
 
 @login_required
 def add_to_favorites(request, product_id):
     product = get_object_or_404(Product, id=product_id)
-    Favorite.objects.get_or_create(user=request.user, product=product)
-    return redirect('product_list')
+
+    favotite_product, created = Favorite.objects.get_or_create(user=request.user, product=product)
+    if not created:
+        favotite_product.delete()
+    return redirect('index')
 
 @login_required
 def add_to_cart(request, product_id):
