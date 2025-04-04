@@ -4,35 +4,60 @@
 
 {% load static %}
 
+{% block title %}
+ Корзина {{ user }}
+{% endblock title %}
+
+{% block cart_total %}
+{{ cart_len }}
+{% endblock %}
+
 {% block con %}
-<h2 class="text-center">Корзина {{ total_price }}</h2>  
+<h2 class="text-center" style="font-size: 50px;">Корзина {{ total_price }}</h2>  
 <hr>  
 <div style="width: 100%; ">
     {% for product in cart_items %}
     <div class="shadow-sm p-3 bg-body rounded rounded-2 border border-light border-2 btn-light d-flex" style="text-decoration: none; cursor: pointer; margin: 10px;">
         <a href="{% url 'product_detail' product.product.id %}" style="text-decoration: none;" class="d-flex">
-            <div style="width: 400px; height: 400px; margin: 20px;">
-                <img src="{{ product.product.image.url }}" alt="" style="height: 400px; width: 400px;; object-fit: contain;"/>
+            <div style="width: 200px; height: 200px; margin: 20px;">
+                <img src="{{ product.product.image.url }}" alt="" style="height: 200px; width: 200px;; object-fit: contain;"/>
             </div>
         </a> 
         <div class="text-dark" style="width: 250px; margin-left: 20px; display: flex; flex-direction: column;">
-            <div class=""><h3  style="margin-top: 5px;">{{ product.product.name }}</h3>
-                <h4 style=" color: rgb(13, 110, 253);">{{ product.product.price }}</h4>
+            <div class="">
+                <div class="d-flex justify-content-between align-items-center" style="width: 450px;">
+                    <h3  style="margin-top: 5px; font-size: 50px;">{{ product.product.name }}</h3>
+                    {% if user.is_authenticated %}
+                    {% with favorite_product|cart_filters:product.product.id as item %}
+                        <a class="me-3" href="{% url 'add_to_favorites' product.product.id %}" style=" height: 50px; width: 50px;">
+                        {% if item %} 
+                        <img src="{% static 'img/heart_blue.png' %}" alt="">
+                        {% else %}
+                        <img src="{% static 'img/heart.png' %}" alt="">
+                        {% endif %}
+                        </a>
+                    {% endwith %}    
+                    {% endif %}
+                </div> 
+                <h3 style=" color: rgb(13, 110, 253);">{{ product.product.price }}</h3>  
             </div>
             <p class="text-secondary" style="flex:1 1 auto; padding-left: 8px; margin-bottom: 10; overflow-wrap: break-word; display: -webkit-box; -webkit-line-clamp: 3;-webkit-box-orient: vertical;overflow: hidden; line-height: 160%;">{{ product.product.description }}</p>
             <div class="d-flex justify-content-around text-center align-items-center" style="background-color: rgb(212, 220, 244); border-radius: 10px; padding: 4px;">
-            {% with cart_items|cart_filters:product.product.id as cart_item %}
-            {% if cart_item %}    
-                <a style="text-decoration: none; width: 30px; padding: 3px; font-weight: 700; font-size: 25px;" href="{% url 'remove_from_cart' cart_item.id %}">-</a> 
-                <span>{{ cart_items|cart_quantity:product.product }}</span>
-                <a style="text-decoration: none; width: 30px; padding: 3px; font-weight: 700; font-size: 20px;" href="{% url 'add_to_cart2' product.product.id %}">+</a>  
-            {% else %}  
-                <a style=" text-decoration: none;  padding: 8px; font-weight: 600; font-size: 17px;" href="{% url 'add_to_cart' product.product.id %}">Добавить в корзину</a>
-            {% endif %} 
-            {% endwith %}
-            </div>
-        </div>  
+                {% with cart_items|cart_filters:product.product.id as cart_item %}
+                {% if cart_item %}    
+                    <a style="text-decoration: none; width: 30px; padding: 3px; font-weight: 700; font-size: 25px;" href="{% url 'remove_from_cart' cart_item.id %}#product-{{ product.product.id }}">-</a> 
+                    <span>{{ cart_items|cart_quantity:product.product }}</span>
+                    <a style="text-decoration: none; width: 30px; padding: 3px; font-weight: 700; font-size: 20px;" href="{% url 'add_to_cart' product.product.id %}#product-{{ product.product.id }}">+</a>  
+                {% endif %} 
+                {% endwith %}
+            </div> 
+        </div>
     </div>
     {% endfor %} 
 </div>
+<script>
+    if ('scrollRestoration' in history) {
+        history.scrollRestoration = 'manual';
+    }
+</script>
 {% endblock %}

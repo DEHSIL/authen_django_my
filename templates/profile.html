@@ -1,20 +1,14 @@
 {% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %} Profile {% endblock title %}</title>
-</head>
-<body>
-    {% block con %}
-        <h2>Добро подаловать {{ user }}</h2>
-        <form action="{% url 'logout' %}" method="post">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-outline-primary">Выйти</button>
-            <a href="{% url 'create' %}" class="btn btn-outline-primary ms-3">Добавить</a>
-        </form>
-    {% endblock con %}
-</body>
-</html>
+{% block title %}
+ Профиль {{ user }}
+{% endblock title %}
+
+{% block cart_total %}
+{{cart_len}}
+{% endblock %}
+   
+
+{% block con %}
+    <h2>Добро подаловать {{ user }}</h2>
+{% endblock con %}

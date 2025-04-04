@@ -8,7 +8,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}{% endblock title %}</title>
+    <title>{% block title %}{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"
 </head>
 <body style="display: flex; flex-direction: column; height: 100%;">
@@ -22,11 +22,22 @@
                     <li class="list-inline-item">
                         <ul class="  d-flex justify-content-between">
                             {% if user.is_authenticated %}
+                            {% if request.path == '/profile/' %}
+                            <li class="list-inline-item text-center">
+                                <form action="{% url 'logout' %}" method="post">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-primary">Выйти</button>
+                                </form>
+                             </li>
+                             <li class="list-inline-item text-center">
+                                <a href="{% url 'create' %}" class="btn btn-outline-primary ms-3">Добавить</a>
+                             </li>
+                            {% endif %}
                             <li class="list-inline-item text-center">
                                <a href="{% url 'prof' %}" class="btn btn-outline-primary">Профиль</a>
                             </li>
                             <li class="list-inline-item text-center">
-                               <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary">Корзина</a>
+                               <a href="{% url 'cart_detail' %}" class="btn btn-outline-primary">Корзина{% block cart_total %}{% endblock %}</a>
                             </li>
                             {% else %}
                             <li class="list-inline-item">
@@ -59,7 +70,7 @@
                 <img src="{% static 'img/logo-svgrepo-com.svg' %}" alt="svg" style="height: 6%; width: 6%; margin-top: 20px;" >
                 <br>
                 <br>
-                <div><time datetime=""></time></div>
+                <div><time datetime="20035461-05-15T19:00">May 15</time>.</div>
                 <br>
             </div>
         </div>

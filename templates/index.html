@@ -4,8 +4,12 @@
 
 {% load static %}
 
-{% block tite %}
-    Главная
+{% block title %}
+    СТИВДЖОБС АРХИВ
+{% endblock %}
+
+{% block cart_total %}
+{{ total_carts_product }}
 {% endblock %}
 
 {% block con %}
@@ -20,7 +24,7 @@
                 </div>
                 <div class="text-dark d-flex justify-content-between" style="width: 250px;">
                     <div class="">
-                        <h3  style="margin-top: 5px;">{{ product.name }}</h3>
+                        <h3  style="margin-top: 5px; color: black;">{{ product.name }}</h3>
                         <h4 style=" color: rgb(13, 110, 253);">{{ product.price }}</h4>
                     </div>
                     {% if user.is_authenticated %}
@@ -45,7 +49,7 @@
                         <span>{{ carts_product|cart_quantity:product }}</span>
                         <a style="text-decoration: none; width: 30px; padding: 3px; font-weight: 700; font-size: 20px;" href="{% url 'add_to_cart' product.id %}">+</a>  
                     {% else %}  
-                        <a style=" text-decoration: none;  padding: 8px; font-weight: 600; font-size: 17px;" href="{% url 'add_to_cart' product.id %}">Добавить в корзину</a>
+                        <a style=" text-decoration: none;  padding: 9px; font-weight: 600; font-size: 17px;" href="{% url 'add_to_cart' product.id %}">Добавить в корзину</a>
                     {% endif %} 
                     {% endwith %}
                 </div>

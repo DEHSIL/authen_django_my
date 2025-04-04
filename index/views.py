@@ -20,13 +20,15 @@ def create(req):
     return render(req, 'create.html', {'form': form})
 
 def product_detail(req, id):
-    
-    is_admin = req.user.is_authenticated and req.user.groups.filter(name='администраторы').exists()
     product = get_object_or_404(Product, id=id)
+    favorite_items = Favorite.objects.filter(user=req.user, product=product)
+    is_admin = req.user.is_authenticated and req.user.groups.filter(name='администраторы').exists()
     comments = Comment.objects.filter(product_id=product.id).order_by('-created_at')
     form = CommentForm() if req.user.is_authenticated else None
     extra_content = True if is_admin else ""
-
+    cart_len = len(Cart.objects.filter(user=req.user))
+    cart_item = Cart.objects.filter(user=req.user, product=product)
+    
     if req.method == 'POST' and req.user.is_authenticated:
         form = CommentForm(req.POST)
         if form.is_valid():
@@ -40,7 +42,10 @@ def product_detail(req, id):
     return render(req, 'product_detail.html', {'product': product,
                                                'form': form,
                                                'comments': comments,
-                                               'extra_content': extra_content
+                                               'extra_content': extra_content,
+                                               'favorite_items': favorite_items,
+                                               'cart_len': cart_len,
+                                               'cart_item': cart_item
                                                })
 
 class ProductListView(ListView):
@@ -55,16 +60,11 @@ class ProductListView(ListView):
         if self.request.user.is_authenticated:
             context["carts_product"] = Cart.objects.filter(user=self.request.user)  # Добавляем корзину в контекст
             context["favorite_product"] = Favorite.objects.filter(user=self.request.user)
-            for i in context['favorite_product']:
-                print(i.product)
-
-            for i in context['carts_product']:
-                print(i.product)
-           
+            context["total_carts_product"] = len(context["carts_product"])
         else:
             context["carts_product"] = None
             context["favorite_product"] = None
-        return context  # Возвращаем обновленный контекст
+        return context
 
 def reg(req):
     if req.method == 'POST':
@@ -95,10 +95,17 @@ def logout_view(req):
 
 @login_required
 def prof(req):
+    cart_items = Cart.objects.filter(user=req.user)  # Добавляем корзину в контекст
+    favorite_items = Favorite.objects.filter(user=req.user)
+    cart_len = len(cart_items)
     print(req)
-    cart_items = Cart.objects.filter(user=req.user)
+
     total_price = sum(item.total_price() for item in cart_items)
-    return render(req, 'profile.html', {'cart_items': cart_items, 'total_price': total_price})
+    return render(req, 'profile.html', {'cart_items': cart_items, 
+                                        'total_price': total_price,
+                                        'favorite_items': favorite_items,
+                                        'cart_len': cart_len,
+                                        })
 
 @login_required
 def add_to_favorites(request, product_id):
@@ -107,7 +114,7 @@ def add_to_favorites(request, product_id):
     favotite_product, created = Favorite.objects.get_or_create(user=request.user, product=product)
     if not created:
         favotite_product.delete()
-    return redirect('index')
+    return redirect(f"{request.META.get('HTTP_REFERER', '/')}")
 
 @login_required
 def add_to_cart(request, product_id):
@@ -116,32 +123,30 @@ def add_to_cart(request, product_id):
     if not created:
         cart_item.quantity += 1
         cart_item.save()
-    return redirect('cart_detail')
-
-@login_required
-def add_to_cart2(request, product_id):
-    product = get_object_or_404(Product, id=product_id)
-    cart_item, created = Cart.objects.get_or_create(user=request.user, product=product)
-    if not created:
-        cart_item.quantity += 1
-        cart_item.save()
-    return redirect('index')
+    return redirect(f"{request.META.get('HTTP_REFERER', '/') }")
 
 @login_required
 def cart_detail(req):
+    favorite_product = Favorite.objects.filter(user=req.user)
     cart_items = Cart.objects.filter(user=req.user) if req.user.is_authenticated else None
     total_price = sum(item.total_price() for item in cart_items)
-    return render(req, 'cart.html', {'cart_items': cart_items, 'total_price': total_price})
+    cart_len = len(cart_items)
+
+    return render(req, 'cart.html', {'cart_items': cart_items, 
+                                     'total_price': total_price,
+                                     'cart_len': cart_len,
+                                     'favorite_product': favorite_product
+                                     })
 
 @login_required
-def remove_from_cart(request, cart_id):
+def remove_from_cart(request, cart_id,):
     cart_item = get_object_or_404(Cart, id=cart_id, user=request.user)
     if cart_item.quantity > 1:
         cart_item.quantity -= 1
         cart_item.save()
     else:
         cart_item.delete()
-    return redirect('index')
+    return redirect(f"{request.META.get('HTTP_REFERER', '/')}")
 
 @login_required
 def favorite_list(request):
