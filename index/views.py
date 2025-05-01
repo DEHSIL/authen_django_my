@@ -50,7 +50,7 @@ def product_detail(req, id):
 
 class ProductListView(ListView):
     model = Product
-    paginate_by = 3
+    paginate_by = 4
     template_name = "index.html"
     context_object_name = "data"  # В шаблоне данные будут доступны как {{ data }}
 

@@ -25,11 +25,11 @@
         </a> 
         <div class="text-dark" style="width: 250px; margin-left: 20px; display: flex; flex-direction: column;">
             <div class="">
-                <div class="d-flex justify-content-between align-items-center" style="width: 450px;">
+                <div class="d-flex justify-content-between align-items-center">
                     <h3  style="margin-top: 5px; font-size: 50px;">{{ product.product.name }}</h3>
                     {% if user.is_authenticated %}
                     {% with favorite_product|cart_filters:product.product.id as item %}
-                        <a class="me-3" href="{% url 'add_to_favorites' product.product.id %}" style=" height: 50px; width: 50px;">
+                        <a class="ms-3"  href="{% url 'add_to_favorites' product.product.id %}" style=" height: 50px; width: 50px;">
                         {% if item %} 
                         <img src="{% static 'img/heart_blue.png' %}" alt="">
                         {% else %}
